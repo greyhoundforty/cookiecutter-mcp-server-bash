@@ -6,15 +6,6 @@ A Model Context Protocol (MCP) server that provides seamless integration with Co
 
 This project is built on top of the excellent [MCP Server Bash SDK](https://github.com/muthuishere/mcp-server-bash-sdk) by [@muthuishere](https://github.com/muthuishere). The core MCP protocol implementation (`mcpserver_core.sh`) and testing framework (`test_mcpserver_core.sh`) are directly from that repository, providing a solid foundation for building bash-based MCP servers.
 
-**What's from the SDK:**
-- `mcpserver_core.sh` - Complete MCP protocol and JSON-RPC 2.0 implementation
-- `test_mcpserver_core.sh` - Comprehensive testing framework
-- Core architecture and design patterns
-
-**What's new in this project:**
-- `cookiecutter_mcp_server.sh` - Cookiecutter-specific tool implementations and project generation logic
-- Template management and configuration system
-
 ## Features
 
 - **🚀 Template Management** - List, discover, and manage Cookiecutter templates
@@ -58,27 +49,27 @@ This project builds upon the [MCP Server Bash SDK](https://github.com/muthuisher
 
 ```
 ┌─────────────────────┐
-│   MCP Client        │
+│      MCP Client     │
 └─────────┬───────────┘
           │ JSON-RPC 2.0
-┌─────────▼───────────┐
-│  cc_pythonserver.sh │ ← Custom Cookiecutter Implementation
-│  ┌─────────────────┐│
-│  │ Tool Functions  ││
-│  │ - list_templates││
-│  │ - generate_proj ││
-│  │ - test_access   ││
-│  └─────────────────┘│
-└─────────┬───────────┘
-          │
-┌─────────▼───────────┐
-│  mcpserver_core.sh  │ ← From MCP Server Bash SDK
-│  ┌─────────────────┐│
-│  │ JSON-RPC Handler││
-│  │ Protocol Logic  ││
-│  │ Error Handling  ││
-│  └─────────────────┘│
-└─────────────────────┘
+┌─────────▼──────────────────┐
+│ cookiecutter_mcp_server.sh │ ← Custom Cookiecutter Implementation
+│    ┌─────────────────┐     │
+│    │ Tool Functions  |     │
+│    │ - list_templates│     │
+│    │ - generate_proj │     │
+│    │ - test_access   │     │
+│    └─────────────────┘     │
+└────────────┬───────────────┘
+             │
+┌────────────▼──────────┐
+│  mcpserver_core.sh    │ ← From MCP Server Bash SDK
+│  ┌─────────────────┐  │
+│  │ JSON-RPC Handler│  │
+│  │ Protocol Logic  │  │
+│  │ Error Handling  │  │
+│  └─────────────────┘  │
+└───────────────────────┘
 ```
 
 ## Configuration
