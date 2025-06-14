@@ -52,6 +52,35 @@ This project is built on top of the excellent [MCP Server Bash SDK](https://gith
 
 > **Note:** This project includes the core MCP server files from the [MCP Server Bash SDK](https://github.com/muthuishere/mcp-server-bash-sdk). No additional SDK installation is required as the necessary files are bundled with this repository.
 
+## Architecture
+
+This project builds upon the [MCP Server Bash SDK](https://github.com/muthuishere/mcp-server-bash-sdk) architecture:
+
+```
+┌─────────────────────┐
+│   MCP Client        │
+└─────────┬───────────┘
+          │ JSON-RPC 2.0
+┌─────────▼───────────┐
+│  cc_pythonserver.sh │ ← Custom Cookiecutter Implementation
+│  ┌─────────────────┐│
+│  │ Tool Functions  ││
+│  │ - list_templates││
+│  │ - generate_proj ││
+│  │ - test_access   ││
+│  └─────────────────┘│
+└─────────┬───────────┘
+          │
+┌─────────▼───────────┐
+│  mcpserver_core.sh  │ ← From MCP Server Bash SDK
+│  ┌─────────────────┐│
+│  │ JSON-RPC Handler││
+│  │ Protocol Logic  ││
+│  │ Error Handling  ││
+│  └─────────────────┘│
+└─────────────────────┘
+```
+
 ## Configuration
 
 ### Template Configuration
@@ -160,11 +189,6 @@ echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_pr
 
 ## Advanced Usage
 
-### Custom Template Variables
-```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project", "arguments": {"templateName": "pypackage", "outputDir": "./output", "templateValues": {"project_name": "my-awesome-project", "author_name": "Your Name"}}}, "id": 6}' | ./cc_pythonserver.sh
-```
-
 ### Debug Mode
 Enable debug logging by setting `DEBUG_MODE=1` in the script:
 ```bash
@@ -172,9 +196,9 @@ Enable debug logging by setting `DEBUG_MODE=1` in the script:
 DEBUG_MODE=1
 ```
 
-## Testing
+### Testing
 
-Run the test suite to verify functionality:
+Run the test suite to verify functionality core MCP server functionality:
 
 ```bash
 ./test_mcpserver_core.sh
@@ -186,44 +210,7 @@ This will test:
 - Error handling
 - JSON-RPC 2.0 messaging
 
-
-## Architecture
-
-This project builds upon the [MCP Server Bash SDK](https://github.com/muthuishere/mcp-server-bash-sdk) architecture:
-
-```
-┌─────────────────────┐
-│   MCP Client        │
-└─────────┬───────────┘
-          │ JSON-RPC 2.0
-┌─────────▼───────────┐
-│  cc_pythonserver.sh │ ← Custom Cookiecutter Implementation
-│  ┌─────────────────┐│
-│  │ Tool Functions  ││
-│  │ - list_templates││
-│  │ - generate_proj ││
-│  │ - test_access   ││
-│  └─────────────────┘│
-└─────────┬───────────┘
-          │
-┌─────────▼───────────┐
-│  mcpserver_core.sh  │ ← From MCP Server Bash SDK
-│  ┌─────────────────┐│
-│  │ JSON-RPC Handler││
-│  │ Protocol Logic  ││
-│  │ Error Handling  ││
-│  └─────────────────┘│
-└─────────────────────┘
-```
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- **[MCP Server Bash SDK](https://github.com/muthuishere/mcp-server-bash-sdk)** by [@muthuishere](https://github.com/muthuishere) - The foundational SDK that makes this project possible, providing the complete MCP protocol implementation and testing framework
-- [Cookiecutter](https://github.com/cookiecutter/cookiecutter) - The templating engine that powers this server
-- [Model Context Protocol](https://modelcontextprotocol.io/) - The protocol specification
-- [JSON-RPC 2.0](https://www.jsonrpc.org/specification) - The underlying RPC protocol
 
