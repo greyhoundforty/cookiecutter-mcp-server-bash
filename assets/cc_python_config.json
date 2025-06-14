@@ -1,0 +1,57 @@
+{
+  "protocolVersion": "2024-11-05",
+  "serverInfo": {
+    "name": "CookieCutterPythonServer",
+    "version": "0.1.0"
+  },
+  "capabilities": {
+    "tools": {
+      "listChanged": true
+    }
+  },
+  "instructions": "This server provides infrastructure for creating new github repositories based on Cookiecutter templates.",
+  "templates": {
+    "pypackage": {
+      "name": "pypackage",
+      "url": "https://github.com/audreyfeldroy/cookiecutter-pypackage",
+      "description": "Cookiecutter template for a Python package with best practices",
+      "category": "library",
+      "language": "python"
+    },
+    "django": {
+      "name": "django",
+      "url": "https://github.com/cookiecutter/cookiecutter-django",
+      "description": "A cookiecutter template for creating Django projects quickly",
+      "category": "web-framework",
+      "language": "python"
+    },
+    "fastapi": {
+      "name": "fastapi",
+      "url": "https://github.com/tiangolo/full-stack-fastapi-postgresql",
+      "description": "Full stack FastAPI and PostgreSQL base project generator",
+      "category": "web-framework",
+      "language": "python"
+    },
+    "local-claude": {
+      "name": "local-claude",
+      "url": "/Users/ryan/.cookiecutter-templates/claude-python-project",
+      "description": "A cookiecutter template for that I created",
+      "category": "web-framework",
+      "language": "python"
+    },
+    "flask": {
+      "name": "flask",
+      "url": "https://github.com/cookiecutter-flask/cookiecutter-flask",
+      "description": "Cookiecutter template for Flask applications",
+      "category": "web-framework",
+      "language": "python"
+  },
+    "vpc-vpn": {
+      "name": "vpc-vpn",
+      "url": "https://github.com/greyhoundforty/cookiecutter-vpc-vpn",
+      "description": "Cookiecutter template for vpc-vpn",
+      "category": "web-framework",
+      "language": "python"
+    }
+    }
+}
