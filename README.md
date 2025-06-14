@@ -12,16 +12,13 @@ This project is built on top of the excellent [MCP Server Bash SDK](https://gith
 - Core architecture and design patterns
 
 **What's new in this project:**
-- `cc_pythonserver.sh` - Cookiecutter-specific tool implementations
+- `cookiecutter_mcp_server.sh` - Cookiecutter-specific tool implementations and project generation logic
 - Template management and configuration system
-- Git authentication bypass solutions
-- Cookiecutter integration and project generation logic
 
 ## Features
 
 - **🚀 Template Management** - List, discover, and manage Cookiecutter templates
 - **🌐 Remote & Local Support** - Work with GitHub repositories and local template directories  
-- **🔐 Authentication Bypass** - Automatic handling of Git authentication issues for public repositories
 - **📋 Template Validation** - Test template accessibility before project generation
 - **🛠️ Flexible Configuration** - Easy template configuration through JSON files
 - **📊 Comprehensive Logging** - Detailed logging and debugging capabilities
@@ -42,17 +39,7 @@ This project is built on top of the excellent [MCP Server Bash SDK](https://gith
    cd cookiecutter-mcp-server
    ```
 
-2. **Make scripts executable:**
-   ```bash
-   chmod +x cc_pythonserver.sh mcpserver_core.sh
-   ```
-
-3. **Create logs directory:**
-   ```bash
-   mkdir -p logs
-   ```
-
-4. **Install dependencies:**
+2. **Install dependencies:**
    ```bash
    # Install jq (if not already installed)
    brew install jq  # macOS
@@ -69,7 +56,7 @@ This project is built on top of the excellent [MCP Server Bash SDK](https://gith
 
 ### Template Configuration
 
-Edit `assets/cc_python_config.json` to add your templates:
+Edit `assets/cookiecutter_mcp_config.json` to add your templates:
 
 ```json
 {
@@ -112,37 +99,30 @@ git config --global credential.helper ""
 
 ```bash
 # Run the MCP server
-./cc_pythonserver.sh
+./cookiecutter_mcp_server.sh
 ```
-
 The server will listen for JSON-RPC 2.0 messages on stdin and respond on stdout.
 
 ### Available Tools
 
 #### 1. List Templates
 ```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "list_templates"}, "id": 1}' | ./cc_pythonserver.sh
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "list_templates"}, "id": 1}' | ./cookiecutter_mcp_server.sh
 ```
 
 #### 2. Get Template Information  
 ```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_template_info", "arguments": {"templateName": "pypackage"}}, "id": 2}' | ./cc_pythonserver.sh
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_template_info", "arguments": {"templateName": "pypackage"}}, "id": 2}' | ./cookiecutter_mcp_server.sh
 ```
 
 #### 3. Test Template Access
 ```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "test_template_access", "arguments": {"templateName": "pypackage"}}, "id": 3}' | ./cc_pythonserver.sh
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "test_template_access", "arguments": {"templateName": "pypackage"}}, "id": 3}' | ./cookiecutter_mcp_server.sh
 ```
 
 #### 4. Generate Project
 ```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project", "arguments": {"templateName": "pypackage", "outputDir": "./my-new-project"}}, "id": 4}' | ./cc_pythonserver.sh
-```
-
-#### 5. Generate Project (ZIP Download)
-For repositories with authentication issues:
-```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project_zip", "arguments": {"templateName": "pypackage", "outputDir": "./my-new-project"}}, "id": 5}' | ./cc_pythonserver.sh
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project", "arguments": {"templateName": "pypackage", "outputDir": "./my-new-project"}}, "id": 4}' | ./cookiecutter_mcp_server.sh
 ```
 
 ## Template Types
@@ -206,47 +186,6 @@ This will test:
 - Error handling
 - JSON-RPC 2.0 messaging
 
-## Troubleshooting
-
-### Common Issues
-
-**Git Authentication Prompts:**
-```bash
-# Solution 1: Disable credential helper
-git config --global credential.helper ""
-
-# Solution 2: Use ZIP download method
-# Use generate_project_zip instead of generate_project
-```
-
-**jq Parse Errors:**
-- Ensure all JSON files are valid
-- Check for control characters in input
-- Enable debug mode to identify parsing issues
-
-**Template Not Found:**
-- Verify template name matches configuration exactly
-- Check template URL accessibility
-- Ensure local template paths are absolute and exist
-
-**Permission Errors:**
-```bash
-# Make scripts executable
-chmod +x cc_pythonserver.sh mcpserver_core.sh
-
-# Check directory permissions
-ls -la logs/
-```
-
-### Debugging
-
-1. **Enable debug mode** by setting `DEBUG_MODE=1`
-2. **Check logs** in `logs/cc_python_tools.log`
-3. **Validate JSON** configuration files:
-   ```bash
-   jq . assets/cc_python_config.json
-   jq . assets/cc_python_tools.json
-   ```
 
 ## Architecture
 
@@ -277,30 +216,6 @@ This project builds upon the [MCP Server Bash SDK](https://github.com/muthuisher
 └─────────────────────┘
 ```
 
-**SDK Components (from [mcp-server-bash-sdk](https://github.com/muthuishere/mcp-server-bash-sdk)):**
-- JSON-RPC 2.0 protocol handling
-- MCP specification compliance  
-- Request/response processing
-- Error handling and logging
-- Testing framework
-
-**Custom Implementation:**
-- Cookiecutter template management
-- Git authentication bypass
-- Project generation workflows
-- Template validation and testing
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite (`./test_mcpserver_core.sh`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -311,16 +226,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Cookiecutter](https://github.com/cookiecutter/cookiecutter) - The templating engine that powers this server
 - [Model Context Protocol](https://modelcontextprotocol.io/) - The protocol specification
 - [JSON-RPC 2.0](https://www.jsonrpc.org/specification) - The underlying RPC protocol
-
-## Support
-
-If you encounter issues or have questions:
-
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Review the logs in `logs/cc_python_tools.log`
-3. Open an issue on GitHub with:
-   - Your system information (OS, Bash version, etc.)
-   - The command that failed
-   - Relevant log entries
-   - Steps to reproduce
 
