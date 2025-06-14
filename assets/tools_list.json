@@ -1,1 +1,63 @@
-cookiecutter_mcp_tools.json
+{
+  "tools": [
+    {
+      "name": "list_templates",
+      "description": "List all available cookiecutter templates with their descriptions",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "get_template_info",
+      "description": "Get detailed information about a specific cookiecutter template",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "templateName": {
+            "type": "string",
+            "description": "Name of the template to get info for"
+          }
+        },
+        "required": ["templateName"]
+      }
+    },
+    {
+      "name": "generate_project",
+      "description": "Generate a new project from a cookiecutter template",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "templateName": {
+            "type": "string",
+            "description": "Name of the template to use"
+          },
+          "outputDir": {
+            "type": "string",
+            "description": "Output directory for the generated project (optional, defaults to current directory)"
+          },
+          "templateValues": {
+            "type": "object",
+            "description": "Key-value pairs for template variables (optional, uses defaults if not provided)"
+          }
+        },
+        "required": ["templateName"]
+      }
+    },
+    {
+      "name": "test_template_access",
+      "description": "Test if a template URL is accessible without generating a project",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "templateName": {
+            "type": "string",
+            "description": "Name of the template to test"
+          }
+        },
+        "required": ["templateName"]
+      }
+    }
+  ]
+}
