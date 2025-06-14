@@ -2,7 +2,7 @@
 # Cookiecutter Python templates business logic implementation
 
 # Debug mode - set to 1 to enable debugging
-DEBUG_MODE=1
+DEBUG_MODE=0
 
 debug_log() {
     if [[ "$DEBUG_MODE" == "1" ]]; then
@@ -11,9 +11,9 @@ debug_log() {
 }
 
 # Override configuration paths BEFORE sourcing the core
-MCP_CONFIG_FILE="$(dirname "${BASH_SOURCE[0]}")/assets/cc_python_config.json"
-MCP_TOOLS_LIST_FILE="$(dirname "${BASH_SOURCE[0]}")/assets/cc_python_tools.json"
-MCP_LOG_FILE="$(dirname "${BASH_SOURCE[0]}")/logs/cc_python_tools.log"
+MCP_CONFIG_FILE="$(dirname "${BASH_SOURCE[0]}")/assets/cookiecutter_mcp_config.json"
+MCP_TOOLS_LIST_FILE="$(dirname "${BASH_SOURCE[0]}")/assets/cookiecutter_mcp_tools.json"
+MCP_LOG_FILE="$(dirname "${BASH_SOURCE[0]}")/logs/cookiecutter_mcp.log"
 
 debug_log "Config file: $MCP_CONFIG_FILE"
 debug_log "Tools file: $MCP_TOOLS_LIST_FILE"

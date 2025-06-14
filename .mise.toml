@@ -1,0 +1,159 @@
+[tools]
+# Development tools managed by mise
+jq = "latest"
+shellcheck = "latest"
+shfmt = "latest"
+
+[env]
+# Environment variables for the project
+DEBUG_MODE = "0"
+MCP_LOG_LEVEL = "INFO"
+
+[tasks.setup]
+description = "Set up the development environment"
+run = [
+    "mkdir -p logs",
+    "chmod +x cc_pythonserver.sh mcpserver_core.sh test_mcpserver_core.sh",
+    "echo '✅ Development environment setup complete'"
+]
+
+[tasks.test]
+description = "Run the full test suite"
+run = "./test_mcpserver_core.sh"
+outputs = ["logs/test_mcpserver.log"]
+
+[tasks.test-verbose]
+description = "Run tests with verbose output and keep logs"
+env = { DEBUG_MODE = "1", KEEP_LOGS = "true" }
+run = "./test_mcpserver_core.sh"
+
+[tasks.lint]
+description = "Lint all shell scripts"
+run = [
+    "echo '🔍 Running shellcheck on all shell scripts...'",
+    "find . -name '*.sh' -type f -exec shellcheck {} +",
+    "echo '✅ Shellcheck completed'"
+]
+
+[tasks.format]
+description = "Format all shell scripts"
+run = [
+    "echo '📝 Formatting shell scripts...'",
+    "find . -name '*.sh' -type f -exec shfmt -w -i 4 -ci {} +",
+    "echo '✅ Shell script formatting completed'"
+]
+
+[tasks.format-check]
+description = "Check if shell scripts are properly formatted"
+run = [
+    "echo '🔍 Checking shell script formatting...'",
+    "find . -name '*.sh' -type f -exec shfmt -d -i 4 -ci {} +",
+    "echo '✅ Format check completed'"
+]
+
+[tasks.validate-json]
+description = "Validate all JSON configuration files"
+run = [
+    "echo '🔍 Validating JSON files...'",
+    "find assets/ -name '*.json' -type f -exec jq . {} \\; > /dev/null",
+    "echo '✅ All JSON files are valid'"
+]
+
+[tasks.start]
+description = "Start the MCP server"
+run = "./cc_pythonserver.sh"
+
+[tasks.start-debug]
+description = "Start the MCP server with debug logging"
+env = { DEBUG_MODE = "1" }
+run = "./cc_pythonserver.sh"
+
+[tasks.demo]
+description = "Run a quick demo of the server functionality"
+run = [
+    "echo '🚀 Running Cookiecutter MCP Server Demo...'",
+    "echo ''",
+    "echo '1. Listing available templates:'",
+    "echo '{\"jsonrpc\": \"2.0\", \"method\": \"tools/call\", \"params\": {\"name\": \"list_templates\"}, \"id\": 1}' | ./cc_pythonserver.sh",
+    "echo ''",
+    "echo '2. Getting template info for pypackage:'",
+    "echo '{\"jsonrpc\": \"2.0\", \"method\": \"tools/call\", \"params\": {\"name\": \"get_template_info\", \"arguments\": {\"templateName\": \"pypackage\"}}, \"id\": 2}' | ./cc_pythonserver.sh",
+    "echo ''",
+    "echo '✅ Demo completed'"
+]
+
+[tasks.clean]
+description = "Clean up logs and temporary files"
+run = [
+    "echo '🧹 Cleaning up...'",
+    "rm -f logs/*.log",
+    "rm -f /tmp/cookiecutter-*",
+    "echo '✅ Cleanup completed'"
+]
+
+[tasks.check]
+description = "Run all checks (lint, format-check, test, validate-json)"
+depends = ["lint", "format-check", "validate-json", "test"]
+run = "echo '✅ All checks passed!'"
+
+[tasks.ci]
+description = "Run CI pipeline (setup, check)"
+depends = ["setup", "check"]
+run = "echo '✅ CI pipeline completed successfully!'"
+
+[tasks.install-deps]
+description = "Install required dependencies"
+run = [
+    "echo '📦 Installing dependencies...'",
+    "# Check for jq",
+    "if ! command -v jq &> /dev/null; then",
+    "    echo '❌ jq is required but not installed'",
+    "    echo 'Install with: brew install jq (macOS) or apt-get install jq (Ubuntu)'",
+    "    exit 1",
+    "fi",
+    "# Check for cookiecutter", 
+    "if ! command -v cookiecutter &> /dev/null; then",
+    "    echo '❌ cookiecutter is required but not installed'",
+    "    echo 'Install with: pip install cookiecutter'",
+    "    exit 1",
+    "fi",
+    "echo '✅ All dependencies are installed'"
+]
+
+[tasks.logs]
+description = "Show recent logs"
+run = [
+    "echo '📋 Recent MCP Server logs:'",
+    "if [ -f logs/cc_python_tools.log ]; then",
+    "    tail -20 logs/cc_python_tools.log",
+    "else",
+    "    echo 'No logs found. Run some tasks first.'",
+    "fi"
+]
+
+[tasks.logs-follow]
+description = "Follow logs in real-time"
+run = [
+    "echo '📋 Following logs (Ctrl+C to stop):'",
+    "mkdir -p logs",
+    "touch logs/cc_python_tools.log",
+    "tail -f logs/cc_python_tools.log"
+]
+
+[tasks.template-test]
+description = "Test template accessibility"
+run = [
+    "echo '🧪 Testing template accessibility...'",
+    "echo '{\"jsonrpc\": \"2.0\", \"method\": \"tools/call\", \"params\": {\"name\": \"test_template_access\", \"arguments\": {\"templateName\": \"pypackage\"}}, \"id\": 1}' | ./cc_pythonserver.sh"
+]
+
+# Development workflow tasks
+[tasks.dev]
+description = "Development workflow: setup, install deps, run checks"
+depends = ["setup", "install-deps", "check"]
+run = "echo '🎉 Development environment ready!'"
+
+[tasks.pre-commit]
+description = "Run pre-commit checks (format, lint, validate)"
+depends = ["format", "lint", "validate-json"]
+run = "echo '✅ Pre-commit checks completed'"

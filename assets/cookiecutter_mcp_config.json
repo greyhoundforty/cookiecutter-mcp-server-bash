@@ -2,7 +2,7 @@
   "protocolVersion": "2024-11-05",
   "serverInfo": {
     "name": "CookieCutterPythonServer",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "capabilities": {
     "tools": {
@@ -32,6 +32,13 @@
       "category": "web-framework",
       "language": "python"
     },
+    "local-dir": {
+      "name": "local-dir",
+      "url": "/path/to/local-cookicutter-directory",
+      "description": "Using a local cookiecutter directory",
+      "category": "web-framework",
+      "language": "python"
+    },
     "local-claude": {
       "name": "local-claude",
       "url": "/Users/ryan/.cookiecutter-templates/claude-python-project",
@@ -45,7 +52,7 @@
       "description": "Cookiecutter template for Flask applications",
       "category": "web-framework",
       "language": "python"
-  },
+    },
     "vpc-vpn": {
       "name": "vpc-vpn",
       "url": "https://github.com/greyhoundforty/cookiecutter-vpc-vpn",
@@ -53,5 +60,5 @@
       "category": "web-framework",
       "language": "python"
     }
-    }
+  }
 }

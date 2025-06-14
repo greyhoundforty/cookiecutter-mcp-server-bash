@@ -1,34 +1,4 @@
 {
-      "name": "generate_project_zip",
-      "description": "Generate a new project from a cookiecutter template using ZIP download (bypasses git)",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "templateName": {
-            "type": "string",
-            "description": "Name of the template to use"
-          },
-          "outputDir": {
-            "type": "string",
-            "description": "Output directory for the generated project (optional, defaults to current directory)"
-          }
-        },
-        "required": ["templateName"]
-      }
-    },    {
-      "name": "test_template_access",
-      "description": "Test if a template URL is accessible without generating a project",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "templateName": {
-            "type": "string",
-            "description": "Name of the template to test"
-          }
-        },
-        "required": ["templateName"]
-      }
-    },{
   "tools": [
     {
       "name": "list_templates",
@@ -70,6 +40,20 @@
           "templateValues": {
             "type": "object",
             "description": "Key-value pairs for template variables (optional, uses defaults if not provided)"
+          }
+        },
+        "required": ["templateName"]
+      }
+    },
+    {
+      "name": "test_template_access",
+      "description": "Test if a template URL is accessible without generating a project",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "templateName": {
+            "type": "string",
+            "description": "Name of the template to test"
           }
         },
         "required": ["templateName"]

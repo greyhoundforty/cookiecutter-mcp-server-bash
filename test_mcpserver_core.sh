@@ -16,30 +16,21 @@ export MCP_LOG_FILE="$SCRIPT_DIR/test_mcpserver.log"
 # Note: run_mcp_server is only a function defined in mcpserver_core.sh but not executed
 # unless explicitly called
 
- function tool_test_echo() {
-      
-        
-        # Extract text directly using grep to avoid jq parsing issues with multi-line JSON
-        
-          log "tool_test_echo called with: $1"
-
-            local args="$1"
-    
-    local text=$(echo "$args" | jq -r '.text')
-        
+function tool_test_echo() {
+    # Extract text directly using grep to avoid jq parsing issues with multi-line JSON
+        log "tool_test_echo called with: $1"
+        local args="$1"
+local text=$(echo "$args" | jq -r '.text')
                 
-        if [[ -z "$text" ]]; then
-            echo "null"
-            return 1
-        fi
-        
-
+    if [[ -z "$text" ]]; then
+        echo "null"
+        return 1
+    fi
     
-
-        # Simple string output, no JSON formatting needed
-        echo "Hello, $text" 
-        return 0
-    }
+    # Simple string output, no JSON formatting needed
+    echo "Hello, $text" 
+    return 0
+}
 
 
 # Source the core server implementation
@@ -133,13 +124,9 @@ test_handle_tools_call() {
     # Call the process_request function with proper JSON-RPC formatted request
     echo "Calling handle_tools_call with id=$id and params=$params" >&2
     local params="{'name':'test_echo','arguments':{'text':'hello'}"
-  #  [2025-05-31 08:22:07] [REQUEST] {"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"book_ticket","arguments":{"movieId":4,"showTime":"11:30","numTickets":1},"_meta":{"progressToken":"0b35d562-1d24-40b1-8d30-99849fb7b83f"}}}
-# 
+
     # Format the request exactly like in mcpserver.log - as a complete JSON-RPC message
     local request="{\"jsonrpc\":\"2.0\",\"id\":$id,\"method\":\"tools/call\",\"params\":{\"name\":\"test_echo\",\"arguments\":{\"text\":\"MCP!\"}}}"
-
-
-    # //{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_movies","arguments":{},"_meta":{"progressToken":"1027fb9f-9836-42ca-b3fa-d972a9b92c03"}}}
 
     echo "JSON-RPC request: $request" >&2
     

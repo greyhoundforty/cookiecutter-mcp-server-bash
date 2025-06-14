@@ -1,0 +1,75 @@
+# Pre-commit configuration for shell script repository
+# Install with: pip install pre-commit && pre-commit install
+
+repos:
+  # JSON/YAML validation
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-json
+        description: Validate JSON files
+        files: \.(json)$
+      - id: check-yaml
+        description: Validate YAML files
+        files: \.(yaml|yml)$
+
+  # JSON formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        description: Format JSON files
+        files: \.(json|jsonc)$
+        args: ["--tab-width=2", "--print-width=100"]
+
+  # Security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        description: Detect secrets in code
+        args: ['--baseline', '.secrets.baseline']
+        exclude: \.lock$|\.log$|\.git/
+
+  # Local hooks for project-specific checks
+  - repo: local
+    hooks:
+      - id: validate-mcp-config
+        name: Validate MCP Configuration
+        description: Ensure MCP config files are valid
+        entry: bash
+        language: system
+        files: ^assets/.*\.json$
+        args: ["-c", "jq empty assets/cookiecutter_mcp_config.json && jq empty assets/cookiecutter_mcp_tools.json"]
+        
+      - id: check-script-permissions
+        name: Check Script Permissions
+        description: Ensure main scripts are executable
+        entry: bash
+        language: system
+        files: \.(sh)$
+        args: ["-c", "test -x cookiecutter_mcp_server.sh && test -x mcpserver_core.sh && test -x test_mcpserver_core.sh"]
+        
+      - id: run-tests
+        name: Run MCP Server Tests
+        description: Run the test suite before commit
+        entry: bash
+        language: system
+        files: \.(sh|json)$
+        args: ["-c", "./test_mcpserver_core.sh"]
+        pass_filenames: false
+
+# Configuration for specific tools
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
+# Pre-commit configuration for shell script repository
+# Install with: pip install pre-commit && pre-commit install
