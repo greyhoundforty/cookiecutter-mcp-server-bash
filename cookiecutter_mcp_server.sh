@@ -253,7 +253,7 @@ tool_generate_project_zip() {
 }
 
 # Tool: Generate a project from a cookiecutter template
-# Parameters: Takes a JSON object with templateName, outputDir (optional), templateValues (optional)
+# Parameters: Takes a JSON object with templateName, outputDir (optional), templateValues (optional), cacheAction (optional)
 # Success: Echo JSON result and return 0
 # Error: Echo error message and return 1
 tool_generate_project() {
@@ -274,10 +274,14 @@ tool_generate_project() {
     local template_name=$(echo "$clean_args" | jq -r '.templateName // empty')
     local output_dir=$(echo "$clean_args" | jq -r '.outputDir // "."')
     local template_values=$(echo "$clean_args" | jq -r '.templateValues // {}')
+    local cache_action=$(echo "$clean_args" | jq -r '.cacheAction // "use"')  # use, clear, or force
+    local overwrite_output=$(echo "$clean_args" | jq -r '.overwriteOutput // false')
     
     debug_log "Parsed - template_name: $template_name"
     debug_log "Parsed - output_dir: $output_dir"
     debug_log "Parsed - template_values: $template_values"
+    debug_log "Parsed - cache_action: $cache_action"
+    debug_log "Parsed - overwrite_output: $overwrite_output"
     
     # Parameter validation
     if [[ -z "$template_name" ]]; then
@@ -332,10 +336,37 @@ tool_generate_project() {
         fi
     else
         debug_log "Using remote template: $template_url"
+        
+        # Handle cache management for remote templates
+        if [[ "$cache_action" == "clear" ]]; then
+            debug_log "Clearing cookiecutter cache"
+            # Get cookiecutter cache directory
+            local cache_dir="$HOME/.cookiecutters"
+            if [[ -d "$cache_dir" ]]; then
+                # Extract repo name from URL for cache cleanup
+                local repo_name=$(basename "$template_url" .git)
+                local cached_template="$cache_dir/$repo_name"
+                if [[ -d "$cached_template" ]]; then
+                    debug_log "Removing cached template: $cached_template"
+                    rm -rf "$cached_template"
+                fi
+            fi
+        elif [[ "$cache_action" == "force" ]]; then
+            debug_log "Using force mode - will overwrite cache"
+        fi
     fi
     
     # Build cookiecutter command
-    local cookiecutter_cmd="cookiecutter --output-dir \"$output_dir\" --no-input \"$template_url\""
+    local cookiecutter_cmd="cookiecutter --output-dir \"$output_dir\" --no-input"
+    
+    # Add overwrite flag if requested
+    if [[ "$overwrite_output" == "true" ]]; then
+        cookiecutter_cmd="$cookiecutter_cmd --overwrite-if-exists"
+        debug_log "Added --overwrite-if-exists flag"
+    fi
+    
+    # Add template URL
+    cookiecutter_cmd="$cookiecutter_cmd \"$template_url\""
     
     # Process template values for --no-input mode
     if [[ "$template_values" != "{}" && "$template_values" != "null" ]]; then
@@ -394,6 +425,14 @@ tool_generate_project() {
         export GIT_ASKPASS=/bin/false
         export COOKIECUTTER_NO_INPUT=1
         
+        # Add force flag for cache if requested
+        if [[ "$cache_action" == "force" ]]; then
+            # For force mode, we'll use a different approach
+            # Set cookiecutter to always use latest version
+            cookiecutter_cmd=$(echo "$cookiecutter_cmd" | sed 's/--no-input/--no-input --checkout HEAD/')
+            debug_log "Modified command for force mode: $cookiecutter_cmd"
+        fi
+        
         # Run cookiecutter with timeout to prevent hanging
         debug_log "About to execute: $cookiecutter_cmd"
         timeout 60 bash -c "$cookiecutter_cmd" >"$stdout_file" 2>"$stderr_file"
@@ -422,13 +461,28 @@ tool_generate_project() {
         # Clean up temporary files
         rm -f "$stdout_file" "$stderr_file"
         
-        if [[ $exit_code -ne 0 ]]; then
+        # Check if the error is related to cache confirmation
+        if [[ $exit_code -ne 0 && "$stderr_content" =~ (already|exists|overwrite|delete) ]]; then
+            debug_log "Detected cache/overwrite issue, suggesting solutions"
+            # Properly escape the error message for JSON
+            local clean_error=$(echo "$stderr_content" | tr -cd '[:print:]' | head -c 200)
+            echo "Template generation failed due to cache/overwrite issue. Try one of these solutions:
+1. Use cacheAction: 'clear' to remove cached template
+2. Use cacheAction: 'force' to force overwrite
+3. Use overwriteOutput: true to overwrite existing output directory
+Error details: $clean_error"
+            return 1
+        elif [[ $exit_code -ne 0 ]]; then
+            # Clean all error messages to remove control characters
+            local clean_stderr=$(echo "$stderr_content" | tr -cd '[:print:]' | head -c 200)
+            local clean_stdout=$(echo "$stdout_content" | tr -cd '[:print:]' | head -c 200)
+            
             local error_msg="Remote template generation failed (exit code: $exit_code)"
-            if [[ -n "$stderr_content" ]]; then
-                error_msg="$error_msg. Error: $stderr_content"
+            if [[ -n "$clean_stderr" ]]; then
+                error_msg="$error_msg. Error: $clean_stderr"
             fi
-            if [[ -n "$stdout_content" ]]; then
-                error_msg="$error_msg. Output: $stdout_content"
+            if [[ -n "$clean_stdout" ]]; then
+                error_msg="$error_msg. Output: $clean_stdout"
             fi
             debug_log "Error message: $error_msg"
             echo "$error_msg"

@@ -16,6 +16,8 @@ This project is built on top of the excellent [MCP Server Bash SDK](https://gith
 - **⚡ MCP Protocol** - Full JSON-RPC 2.0 and MCP protocol compliance
 - **🎯 Template Values** - Support for custom template parameter values
 
+![Claude desktop using cookiecutter mcp server](./claude-cookiecutter.png)
+
 ## Prerequisites
 
 - **Bash** 4.0+ (macOS/Linux)

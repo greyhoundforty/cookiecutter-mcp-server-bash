@@ -25,7 +25,7 @@
     },
     {
       "name": "generate_project",
-      "description": "Generate a new project from a cookiecutter template",
+      "description": "Generate a new project from a cookiecutter template with advanced options for cache and output management",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -40,6 +40,15 @@
           "templateValues": {
             "type": "object",
             "description": "Key-value pairs for template variables (optional, uses defaults if not provided)"
+          },
+          "cacheAction": {
+            "type": "string",
+            "enum": ["use", "clear", "force"],
+            "description": "How to handle template cache: 'use' (default) - use existing cache, 'clear' - remove cached template before generation, 'force' - force download latest version"
+          },
+          "overwriteOutput": {
+            "type": "boolean",
+            "description": "Whether to overwrite existing files in output directory (default: false)"
           }
         },
         "required": ["templateName"]
@@ -54,6 +63,24 @@
           "templateName": {
             "type": "string",
             "description": "Name of the template to test"
+          }
+        },
+        "required": ["templateName"]
+      }
+    },
+    {
+      "name": "generate_project_zip",
+      "description": "Generate a project using ZIP download method (bypasses git authentication for GitHub repos)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "templateName": {
+            "type": "string",
+            "description": "Name of the template to use"
+          },
+          "outputDir": {
+            "type": "string",
+            "description": "Output directory for the generated project (optional, defaults to current directory)"
           }
         },
         "required": ["templateName"]
