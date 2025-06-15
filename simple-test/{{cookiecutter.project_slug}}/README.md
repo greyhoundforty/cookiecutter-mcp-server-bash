@@ -8,5 +8,8 @@ Additional Tools: {{cookiecutter.additional_tools}}
 
 ```bash
 pip install -r requirements.txt
-Usage
+```
+
+## Usage
+
 This is a test project generated from cookiecutter.

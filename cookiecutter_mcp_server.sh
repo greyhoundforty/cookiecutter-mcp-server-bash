@@ -2,7 +2,7 @@
 # Cookiecutter Python templates business logic implementation
 
 # Debug mode - set to 1 to enable debugging
-DEBUG_MODE=0
+DEBUG_MODE=1
 
 debug_log() {
     if [[ "$DEBUG_MODE" == "1" ]]; then
@@ -187,6 +187,7 @@ tool_test_template_access() {
     echo "Template access test completed successfully"
     return 0
 }
+
 # Tool: Generate a project using ZIP download (bypasses git authentication)
 # Parameters: Takes a JSON object with templateName, outputDir (optional)
 # Success: Echo result and return 0
@@ -226,7 +227,7 @@ tool_generate_project_zip() {
         # Remove .git suffix if present
         repo="${repo%.git}"
         zip_url="https://github.com/$user/$repo/archive/refs/heads/main.zip"
-        log "INFO" "Converted to ZIP URL: $zip_url"
+        debug_log "Converted to ZIP URL: $zip_url"
     else
         echo "Only GitHub repositories are supported for ZIP download method"
         return 1
@@ -236,7 +237,7 @@ tool_generate_project_zip() {
     mkdir -p "$output_dir"
     
     # Try the ZIP download approach
-    log "INFO" "Using ZIP download: cookiecutter --no-input --output-dir $output_dir $zip_url"
+    debug_log "Using ZIP download: cookiecutter --no-input --output-dir $output_dir $zip_url"
     
     # Execute with simplified approach
     local result=$(cookiecutter --no-input --output-dir "$output_dir" "$zip_url" 2>&1)
@@ -251,43 +252,6 @@ tool_generate_project_zip() {
     return 0
 }
 
-
-# Parameters: Takes a JSON object with templateName, outputDir (optional), templateValues (optional)
-# Success: Echo JSON result and return 0
-# Error: Echo error message and return 1
-tool_generate_project() {
-    local args="$1"
-    
-    local template_name=$(echo "$args" | jq -r '.templateName')
-    local output_dir=$(echo "$args" | jq -r '.outputDir // "."')
-    local template_values=$(echo "$args" | jq -r '.templateValues // {}')
-    
-    # Parameter validation
-    if [[ -z "$template_name" ]]; then
-        echo "Missing required parameter: templateName"
-        return 1
-    fi
-    
-    # Check if cookiecutter is installed
-    if ! command -v cookiecutter &> /dev/null; then
-        echo "cookiecutter is not installed. Please install it with: pip install cookiecutter"
-        return 1
-    fi
-    
-    # Get template URL from config
-    local templates=$(get_templates_from_config)
-    local template_url=$(echo "$templates" | jq -r --arg name "$template_name" '.[$name].url')
-    
-    if [[ "$template_url" == "null" ]]; then
-        echo "Template not found: $template_name"
-        return 1
-    fi
-    
-    # Create output directory if it doesn't exist
-    mkdir -p "$output_dir"
-    echo "Directory '$output_dir' created or already exists"
-    return 0
-}
 # Tool: Generate a project from a cookiecutter template
 # Parameters: Takes a JSON object with templateName, outputDir (optional), templateValues (optional)
 # Success: Echo JSON result and return 0
@@ -311,7 +275,9 @@ tool_generate_project() {
     local output_dir=$(echo "$clean_args" | jq -r '.outputDir // "."')
     local template_values=$(echo "$clean_args" | jq -r '.templateValues // {}')
     
-    debug_log "Parsed - template_name: $template_name, output_dir: $output_dir"
+    debug_log "Parsed - template_name: $template_name"
+    debug_log "Parsed - output_dir: $output_dir"
+    debug_log "Parsed - template_values: $template_values"
     
     # Parameter validation
     if [[ -z "$template_name" ]]; then
@@ -328,6 +294,8 @@ tool_generate_project() {
     # Get template URL from config
     debug_log "Reading templates from config file"
     local templates=$(get_templates_from_config)
+    debug_log "Templates from config: $templates"
+    
     if [[ -z "$templates" || "$templates" == "null" || "$templates" == "{}" ]]; then
         echo "No templates found in config"
         return 1
@@ -343,6 +311,7 @@ tool_generate_project() {
     
     # Create output directory if it doesn't exist
     mkdir -p "$output_dir"
+    debug_log "Created/verified output directory: $output_dir"
     
     # Check if template_url is a local path or remote URL
     local is_local=false
@@ -366,33 +335,42 @@ tool_generate_project() {
     fi
     
     # Build cookiecutter command
-    local cc_args=("--output-dir" "$output_dir" "--no-input")
+    local cookiecutter_cmd="cookiecutter --output-dir \"$output_dir\" --no-input \"$template_url\""
     
-    # If template values are provided, create a temporary config file
-    local temp_config=""
+    # Process template values for --no-input mode
     if [[ "$template_values" != "{}" && "$template_values" != "null" ]]; then
-        temp_config=$(mktemp)
-        echo "$template_values" > "$temp_config"
-        cc_args=("--output-dir" "$output_dir" "--config-file" "$temp_config")
+        debug_log "Processing template values: $template_values"
+        
+        # Convert JSON object to key=value pairs for cookiecutter --no-input
+        local template_args=""
+        while IFS= read -r line; do
+            if [[ -n "$line" ]]; then
+                template_args="$template_args $line"
+            fi
+        done < <(echo "$template_values" | jq -r 'to_entries[] | "\(.key)=\"\(.value)\""' 2>/dev/null)
+        
+        debug_log "Template args: $template_args"
+        
+        if [[ -n "$template_args" ]]; then
+            cookiecutter_cmd="$cookiecutter_cmd$template_args"
+        else
+            debug_log "Failed to parse template values, using defaults"
+        fi
+    else
+        debug_log "No template values provided, using defaults"
     fi
     
-    cc_args+=("$template_url")
+    debug_log "Final cookiecutter command: $cookiecutter_cmd"
     
     # Execute cookiecutter command with proper error handling
-    debug_log "Running: cookiecutter ${cc_args[*]}"
-    
-    # For local templates, we can run more simply
     if [[ "$is_local" == true ]]; then
-        local result=$(cookiecutter "${cc_args[@]}" 2>&1)
+        debug_log "Executing local template generation"
+        
+        local result=$(eval "$cookiecutter_cmd" 2>&1)
         local exit_code=$?
         
         debug_log "Local cookiecutter exit code: $exit_code"
         debug_log "Local cookiecutter result: $result"
-        
-        # Clean up temporary config file if created
-        if [[ -n "$temp_config" ]]; then
-            rm -f "$temp_config"
-        fi
         
         if [[ $exit_code -ne 0 ]]; then
             # Clean the result output to avoid JSON parsing issues
@@ -405,6 +383,8 @@ tool_generate_project() {
         return 0
     else
         # Handle remote templates with full error handling
+        debug_log "Executing remote template generation"
+        
         # Create temporary files for stdout and stderr
         local stdout_file=$(mktemp)
         local stderr_file=$(mktemp)
@@ -415,7 +395,8 @@ tool_generate_project() {
         export COOKIECUTTER_NO_INPUT=1
         
         # Run cookiecutter with timeout to prevent hanging
-        timeout 60 cookiecutter "${cc_args[@]}" >"$stdout_file" 2>"$stderr_file"
+        debug_log "About to execute: $cookiecutter_cmd"
+        timeout 60 bash -c "$cookiecutter_cmd" >"$stdout_file" 2>"$stderr_file"
         local exit_code=$?
         
         debug_log "Remote cookiecutter exit code: $exit_code"
@@ -440,9 +421,6 @@ tool_generate_project() {
         
         # Clean up temporary files
         rm -f "$stdout_file" "$stderr_file"
-        if [[ -n "$temp_config" ]]; then
-            rm -f "$temp_config"
-        fi
         
         if [[ $exit_code -ne 0 ]]; then
             local error_msg="Remote template generation failed (exit code: $exit_code)"
