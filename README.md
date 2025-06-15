@@ -14,6 +14,7 @@ This project is built on top of the excellent [MCP Server Bash SDK](https://gith
 - **🛠️ Flexible Configuration** - Easy template configuration through JSON files
 - **📊 Comprehensive Logging** - Detailed logging and debugging capabilities
 - **⚡ MCP Protocol** - Full JSON-RPC 2.0 and MCP protocol compliance
+- **🎯 Template Values** - Support for custom template parameter values
 
 ## Prerequisites
 
@@ -93,10 +94,10 @@ Edit `assets/cookiecutter_mcp_config.json` to add your templates:
       "category": "library",
       "language": "python"
     },
-    "local-template": {
-      "name": "local-template", 
-      "url": "/path/to/your/local/template",
-      "description": "Your local cookiecutter template",
+    "simple-test": {
+      "name": "simple-test", 
+      "url": "./simple-test",
+      "description": "Local test cookiecutter template",
       "category": "custom",
       "language": "python"
     }
@@ -140,9 +141,19 @@ echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "get_templat
 echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "test_template_access", "arguments": {"templateName": "pypackage"}}, "id": 3}' | ./cookiecutter_mcp_server.sh
 ```
 
-#### 4. Generate Project
+#### 4. Generate Project (Basic)
 ```bash
-echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project", "arguments": {"templateName": "pypackage", "outputDir": "./my-new-project"}}, "id": 4}' | ./cookiecutter_mcp_server.sh
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project", "arguments": {"templateName": "simple-test", "outputDir": "./my-new-project"}}, "id": 4}' | ./cookiecutter_mcp_server.sh
+```
+
+#### 5. Generate Project with Template Values
+```bash
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project", "arguments": {"templateName": "simple-test", "outputDir": "./my-custom-project", "templateValues": {"project_name": "awesome-project", "author_name": "Your Name", "author_email": "you@example.com"}}}, "id": 5}' | ./cookiecutter_mcp_server.sh
+```
+
+#### 6. Generate Project using ZIP Download (GitHub only)
+```bash
+echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_project_zip", "arguments": {"templateName": "pypackage", "outputDir": "./zip-project"}}, "id": 6}' | ./cookiecutter_mcp_server.sh
 ```
 
 ## Template Types
@@ -165,7 +176,7 @@ echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_pr
 {
   "local-template": {
     "name": "local-template",
-    "url": "/absolute/path/to/template/directory",
+    "url": "./path/to/template/directory",
     "description": "Local cookiecutter template",
     "category": "custom", 
     "language": "python"
@@ -176,20 +187,38 @@ echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "generate_pr
 **Local template requirements:**
 - Must contain a `cookiecutter.json` file at the root
 - Follow standard Cookiecutter directory structure
-- Use absolute paths in configuration
+- Use relative paths from the MCP server directory or absolute paths
+
+## Template Values
+
+You can provide custom values for template variables using the `templateValues` parameter:
+
+```json
+{
+  "templateValues": {
+    "project_name": "my-awesome-project",
+    "author_name": "John Doe",
+    "author_email": "john@example.com",
+    "python_version": "3.11",
+    "additional_tools": "requests,pandas"
+  }
+}
+```
+
+The keys must match exactly what's defined in the template's `cookiecutter.json` file.
 
 ## Advanced Usage
 
 ### Debug Mode
-Enable debug logging by setting `DEBUG_MODE=1` in the script:
+Enable debug logging by setting `DEBUG_MODE=1` in `cookiecutter_mcp_server.sh`:
 ```bash
-# Edit cc_pythonserver.sh
+# Edit cookiecutter_mcp_server.sh
 DEBUG_MODE=1
 ```
 
 ### Testing
 
-Run the test suite to verify functionality core MCP server functionality:
+Run the test suite to verify core MCP server functionality:
 
 ```bash
 ./test_mcpserver_core.sh
@@ -204,4 +233,3 @@ This will test:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
