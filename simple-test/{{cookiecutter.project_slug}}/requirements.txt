@@ -1,0 +1,5 @@
+{% if cookiecutter.additional_tools %}
+{% for tool in cookiecutter.additional_tools.split(',') %}
+{{tool.strip()}}
+{% endfor %}
+{% endif %}

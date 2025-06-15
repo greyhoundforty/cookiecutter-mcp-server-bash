@@ -1,0 +1,16 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "generate_project",
+    "arguments": {
+      "outputDir": "/Users/ryan/projects/new-claude",
+      "templateName": "local-claude",
+      "templateValues": {
+        "project_name": "my-new-claude-project",
+        "author_name": "Ryan"
+      }
+    }
+  }
+}

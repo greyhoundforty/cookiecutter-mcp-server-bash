@@ -34,7 +34,7 @@
     },
     "local-dir": {
       "name": "local-dir",
-      "url": "/path/to/local-cookicutter-directory",
+      "url": "./simple-test",
       "description": "Using a local cookiecutter directory",
       "category": "web-framework",
       "language": "python"

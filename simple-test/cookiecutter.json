@@ -1,0 +1,8 @@
+{
+  "project_name": "My Test Project",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "author_name": "Your Name",
+  "author_email": "your.email@example.com",
+  "python_version": "3.12",
+  "additional_tools": "requests,pandas"
+}
